@@ -1,0 +1,3 @@
+- První funkční verze projektu.
+-  Skript načítá JSON soubor s kontejnery a vypisuje jméno, status, CPU, paměť, vytvoření (UTC timestamp) a IP adresy.
+-  Další krok: normalizace dat do objektu a zápis do databáze.
