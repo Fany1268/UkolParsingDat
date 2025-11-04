@@ -10,28 +10,30 @@ def main():
     """
 
     # Načtení JSON souboru
-    # Otevřu data.json a načtu celý obsah do proměnné `data`
     with open("data.json", "r", encoding="utf-8") as f:
         data = json.load(f)
 
+    # 🆕 Ověřím, že kořen je seznam (list)
+    if not isinstance(data, list):
+        print("❌ Očekávám, že data.json obsahuje seznam (list) kontejnerů.")
+        return
+
     print(f"Počet kontejnerů: {len(data)}\n")
 
-    # Tady si budu ukládat výsledky jako seznam slovníků (každý kontejner = jeden dict)
     results = []
 
     # Průchod seznamem kontejnerů
     for i, container in enumerate(data, start=1):
-        # Základní údaje
         name = container.get("name", "neznámé_jméno")
 
-        # Status může být buď přímo nahoře, nebo uvnitř bloku "state"
+        # Status může být nahoře, nebo uvnitř "state"
         status = container.get("status")
         if not status:
             state_block = container.get("state")
             if isinstance(state_block, dict):
                 status = state_block.get("status")
 
-        # Paměť a CPU – používám bezpečné přístupy přes .get() a or {}
+        # Paměť a CPU – bezpečný přístup
         mem_usage = ((container.get("state") or {}).get("memory") or {}).get("usage")
         cpu_usage = ((container.get("state") or {}).get("cpu") or {}).get("usage")
 
@@ -39,7 +41,6 @@ def main():
         created_at_str = container.get("created_at")
         if created_at_str:
             try:
-                # fromisoformat neumí koncovku "Z", proto ji nahradím za +00:00 (UTC)
                 dt = datetime.fromisoformat(created_at_str.replace("Z", "+00:00"))
                 created_at_utc = int(dt.timestamp())
             except Exception:
@@ -48,7 +49,6 @@ def main():
             created_at_utc = None
 
         # Síťová rozhraní a IP adresy
-        # Některé kontejnery mohou mít více síťových rozhraní (např. eth0, docker0…)
         state = container.get("state") or {}
         network = state.get("network") or {}
         ips = []
@@ -57,11 +57,9 @@ def main():
                 addr = rec.get("address")
                 if addr:
                     ips.append(addr)
-
-        # Jen IPv4 adresy (bez dvojtečky)
         ipv4 = [ip for ip in ips if ":" not in ip]
 
-        # Vytvořím slovník s přehlednými daty o kontejneru
+        # Objekt (slovník) pro výsledky
         container_info = {
             "name": name,
             "status": status,
@@ -72,7 +70,7 @@ def main():
         }
         results.append(container_info)
 
-        # Krátký výpis do konzole – kontrola a přehled
+        # Výpis do konzole
         print(f"{i}. Název:     {name}")
         print(f"   Stav:       {status}")
         print(f"   Paměť:      {mem_usage} bajtů")
@@ -82,15 +80,14 @@ def main():
         print(f"   IPv4:       {ipv4}")
         print("-" * 40)
 
-    # Ukázka jednoho hotového objektu pro kontrolu (první a poslední)
+    # Ukázka objektů pro kontrolu (první a poslední)
     if results:
         print("\nUkázka objektu pro 1. kontejner:")
         print(json.dumps(results[0], indent=2, ensure_ascii=False))
 
-        # Pokud existuje 17. kontejner, ukážu i ten (kvůli kontrole dat)
-        if len(results) >= 17:
+        if len(results) > 1:
             print("\nUkázka objektu pro poslední kontejner:")
-            print(json.dumps(results[16], indent=2, ensure_ascii=False))
+            print(json.dumps(results[-1], indent=2, ensure_ascii=False))
 
 if __name__ == "__main__":
     main()
