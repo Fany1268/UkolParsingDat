@@ -1,0 +1,20 @@
+# 🧠 Python projekty – ignoruj běžné soubory a složky
+
+# Virtuální prostředí (lokální knihovny)
+.venv/
+venv/
+
+# Konfigurační a bezpečnostní soubory
+.env
+
+# Cache a dočasné soubory
+__pycache__/
+*.pyc
+.DS_Store
+
+# IDE a editorové soubory (PyCharm, VSCode apod.)
+.idea/
+.vscode/
+
+# Učební nebo testovací skripty mimo hlavní projekt
+_scratch/
